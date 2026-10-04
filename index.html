@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vòng Xoay Kỳ Diệu - Gọi Tên Học Sinh</title>
+  <style>
+    /* ==========================================================================
+       HỆ THỐNG GIAO DIỆN THUẦN (ZERO-DEPENDENCY PURE CSS)
+       ========================================================================== */
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      --panel-bg: rgba(255, 255, 255, 0.08);
+      --panel-border: rgba(255, 255, 255, 0.18);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --success: #10b981;
+      --success-hover: #059669;
+      --warning: #f59e0b;
+      --warning-hover: #d97706;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --gold: #fbbf24;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* HEADER & THANH CÔNG CỤ */
+    header {
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* CÁC THÀNH PHẦN FORM & NÚT */
+    select, input, textarea {
+      background: #1e293b;
+      border: 1.5px solid var(--panel-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      color: #fff;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-indigo { background: var(--primary); }
+    .btn-indigo:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-emerald { background: var(--success); }
+    .btn-emerald:hover:not(:disabled) { background: var(--success-hover); }
+    .btn-amber { background: var(--warning); color: #000; }
+    .btn-amber:hover:not(:disabled) { background: var(--warning-hover); }
+    .btn-rose { background: var(--danger); }
+    .btn-rose:hover:not(:disabled) { background: var(--danger-hover); }
+    .btn-slate { background: #334155; }
+    .btn-slate:hover:not(:disabled) { background: #475569; }
+
+    /* KHU VỰC VÒNG XOAY TRUNG TÂM */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      position: relative;
+    }
+
+    .badge-info {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wheel-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.3) 100%);
+      border-radius: 50%;
+      border: 5px solid rgba(251, 191, 36, 0.7);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+
+    #wheelCanvas {
+      width: 480px;
+      height: 480px;
+      max-width: 82vw;
+      max-height: 52vh;
+      border-radius: 50%;
+      display: block;
+    }
+
+    /* KIM CHỈ ĐỊNH VỊ (TOP 12 GIỜ) */
+    .wheel-pointer {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 38px solid #ef4444;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+      z-index: 5;
+    }
+
+    /* TRỤC TÂM VÒNG XOAY */
+    .wheel-center-pin {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fef08a, #f59e0b 70%, #b45309);
+      border: 4px solid #ffffff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 6;
+    }
+
+    /* CỤM NÚT ĐIỀU KHIỂN CHÍNH */
+    .controls-container {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      z-index: 5;
+    }
+    .btn-large {
+      padding: 14px 28px;
+      font-size: 1.15rem;
+      border-radius: 16px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      border-bottom: 4px solid rgba(0, 0, 0, 0.25);
+    }
+
+    /* CANVAS PHÁO HOA ĂN MỪNG */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* MODAL CHUNG */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+    .modal-backdrop.active { display: flex; }
+
+    .modal-card {
+      background: #1e293b;
+      border: 1.5px solid var(--panel-border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 540px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 800; color: var(--gold); }
+    .btn-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.6rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-close:hover { color: #fff; }
+    .modal-body { padding: 20px 22px; max-height: 75vh; overflow-y: auto; }
+    .modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* MODAL KẾT QUẢ QUAY CHIẾN THẮNG */
+    .winner-card {
+      text-align: center;
+      background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+      border: 2px solid var(--gold);
+      max-width: 440px;
+      padding: 30px 24px;
+    }
+    .winner-badge {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 16px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+    }
+    .winner-stt {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .winner-name {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 14px 0 22px;
+      word-break: break-word;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- PHÁO HOA OVERLAY -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- THANH ĐIỀU HƯỚNG TRÊN CÙNG -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <!-- SVG Biểu tượng Vòng xoay -->
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1e1b4b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 2a10 10 0 0 1 10 10"></path>
+          <path d="m16 8-4 4-4-4"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">VÒNG XOAY KỲ DIỆU</div>
+        <div class="brand-sub">Hệ thống gọi tên & tương tác học đường</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Menu Dropdown chọn Lớp -->
+      <select id="classSelect" onchange="handleClassChange()">
+        <option value="">-- Đang nạp lớp... --</option>
+      </select>
+
+      <!-- Nút Quản lý & Nạp danh sách -->
+      <button class="btn btn-indigo" onclick="openClassManagerModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Quản Lý Danh Sách
+      </button>
+
+      <!-- Nút Cài đặt & Đồng bộ Cloud -->
+      <button class="btn btn-slate" onclick="openSyncModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+        </svg>
+        Đồng Bộ Cloud
+      </button>
+    </div>
+  </header>
+
+  <!-- KHU VỰC CHÍNH -->
+  <main>
+    <div id="classInfoBadge" class="badge-info">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <span>Chưa có lớp nào được chọn</span>
+    </div>
+
+    <!-- KHUNG VÒNG XOAY -->
+    <div class="wheel-container">
+      <div class="wheel-pointer"></div>
+      <canvas id="wheelCanvas" width="500" height="500"></canvas>
+      <div class="wheel-center-pin">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#1e1b4b">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+      </div>
+    </div>
+
+    <!-- CÁC NÚT ĐIỀU KHIỂN CHÍNH -->
+    <div class="controls-container">
+      <button id="btnStart" class="btn btn-emerald btn-large" onclick="startSpin()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        BẮT ĐẦU
+      </button>
+
+      <button id="btnPause" class="btn btn-amber btn-large" onclick="togglePauseSpin()" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+        <span id="pauseBtnText">TẠM DỪNG</span>
+      </button>
+
+      <button id="btnStop" class="btn btn-rose btn-large" onclick="stopSpin()" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16"></rect></svg>
+        KẾT THÚC
+      </button>
+    </div>
+  </main>
+
+  <footer>
+    Hệ Thống Trò Chơi Tương Tác Lớp Học &copy; Hỗ trợ dạy học Offline & Online
+  </footer>
+
+  <!-- ==================== CÁC MODAL HỆ THỐNG ==================== -->
+
+  <!-- 1. MODAL HIỂN THỊ KẾT QUẢ CHIẾN THẮNG -->
+  <div id="resultModal" class="modal-backdrop">
+    <div class="modal-card winner-card">
+      <div class="winner-badge">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+          <path d="M4 22h16"></path>
+          <path d="M10 14.66V17c0 .55-.45 1-1 1H7"></path>
+          <path d="M14 14.66V17c0 .55.45 1 1 1h2"></path>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+        </svg>
+      </div>
+      <h2 style="color: var(--gold); text-transform: uppercase; font-size: 1.3rem;">CHÚC MỪNG HỌC SINH</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Đã được chọn ngẫu nhiên trong lượt quay này</p>
+      
+      <div class="winner-stt" id="winnerSTT">STT: --</div>
+      <div class="winner-name" id="winnerName">Họ và Tên</div>
+
+      <button class="btn btn-amber btn-large" style="width: 100%;" onclick="closeResultModal()">
+        TIẾP TỤC QUAY LƯỢT MỚI
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. MODAL QUẢN LÝ DANH SÁCH LỚP (OFFLINE FIRST) -->
+  <div id="classManagerModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Quản Lý & Nạp Danh Sách Học Sinh</div>
+        <button class="btn-close" onclick="closeClassManagerModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Tên Lớp Học:</label>
+          <input type="text" id="inputClassName" placeholder="Ví dụ: 11B2, 12A1, 10C3..." style="width: 100%;">
+        </div>
+
+        <div class="form-group">
+          <label>Dán danh sách học sinh (Mỗi bạn 1 dòng):</label>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;">
+            * Thầy cô có thể copy trực tiếp từ Excel (Cột STT & Họ tên) hoặc dán danh sách thuần tên (hệ thống sẽ tự đánh số 1, 2, 3...).
+          </div>
+          <textarea id="inputRawStudents" rows="9" placeholder="1. Nguyễn Văn An&#10;2. Trần Thị Bích&#10;3. Lê Hoàng Nam..." style="width: 100%; font-family: monospace; font-size: 0.85rem;"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button class="btn btn-emerald" style="flex: 1;" onclick="handleSaveClass()">
+            Lưu Lớp Này Vào Máy
+          </button>
+          <button class="btn btn-rose" onclick="handleDeleteCurrentClass()">
+            Xóa Lớp Này
+          </button>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--panel-border); margin: 20px 0;">
+
+        <div style="font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; color: var(--gold);">Sao Lưu Dự Phòng (Chuyển máy / Tivi):</div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-slate" style="flex: 1;" onclick="exportBackupData()">
+            Xuất File Sao Lưu (.json)
+          </button>
+          <label class="btn btn-slate" style="flex: 1; margin-bottom: 0;">
+            Nạp File Sao Lưu
+            <input type="file" id="fileImportInput" accept=".json,.txt" style="display: none;" onchange="importBackupData(event)">
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-slate" onclick="closeClassManagerModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MODAL CẤU HÌNH ĐỒNG BỘ GOOGLE DRIVE (ONLINE) -->
+  <div id="syncModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Cấu Hình Đồng Bộ Google Drive</div>
+        <button class="btn-close" onclick="closeSyncModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>URL Web App Google Apps Script:</label>
+          <input type="text" id="inputScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" style="width: 100%;">
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">
+            * Dán link Web App triển khai từ Google Sheets để đồng bộ 2 chiều giữa máy tính và Google Drive.
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+          <button id="btnPushCloud" class="btn btn-emerald" onclick="syncPushToCloud()">
+            Đẩy dữ liệu từ máy lên Google Drive
+          </button>
+          <button id="btnPullCloud" class="btn btn-indigo" onclick="syncPullFromCloud()">
+            Tải dữ liệu từ Google Drive về máy
+          </button>
+        </div>
+
+        <div id="syncStatus" style="font-size: 0.85rem; text-align: center; margin-top: 14px; font-weight: 600;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-slate" onclick="closeSyncModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOÀN BỘ LOGIC JAVASCRIPT ==================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. TỔNG HỢP ÂM THANH NỘI BỘ (WEB AUDIO API) - HOÀN TOÀN KHÔNG CẦN FILE MP3
+       -------------------------------------------------------------------------- */
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Tiếng click/tíc tắc cơ học mỗi khi kim chạm nan quạt
+    function playTickSound() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    // Nhạc hợp âm Fanfare khải hoàn khi chọn trúng học sinh
+    function playFanfareSound() {
+      try {
+        initAudio();
+        const notes = [
+          { f: 523.25, start: 0, dur: 0.25 },     // C5
+          { f: 659.25, start: 0.12, dur: 0.25 },  // E5
+          { f: 783.99, start: 0.24, dur: 0.25 },  // G5
+          { f: 1046.50, start: 0.36, dur: 0.6 }   // C6
+        ];
+        notes.forEach(n => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(n.f, audioCtx.currentTime + n.start);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime + n.start);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + n.start + n.dur);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(audioCtx.currentTime + n.start);
+          osc.stop(audioCtx.currentTime + n.start + n.dur);
+        });
+      } catch (e) {}
+    }
+
+    /* --------------------------------------------------------------------------
+       2. BẮN PHÁO HOA ĂN MỪNG THUẦN CANVAS (NATIVE CONFETTI PARTICLES)
+       -------------------------------------------------------------------------- */
+    const confCanvas = document.getElementById('confettiCanvas');
+    const confCtx = confCanvas.getContext('2d');
+    let confettiParticles = [];
+    let confettiAnimId = null;
+
+    function resizeConfetti() {
+      confCanvas.width = window.innerWidth;
+      confCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function triggerConfetti() {
+      confettiParticles = [];
+      const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#ffffff'];
+      for (let i = 0; i < 160; i++) {
+        confettiParticles.push({
+          x: confCanvas.width / 2 + (Math.random() - 0.5) * 200,
+          y: confCanvas.height * 0.55,
+          vx: (Math.random() - 0.5) * 18,
+          vy: -Math.random() * 16 - 8,
+          size: Math.random() * 8 + 5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 12,
+          alpha: 1
+        });
+      }
+      if (!confettiAnimId) renderConfetti();
+    }
+
+    function renderConfetti() {
+      confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+      for (let i = 0; i < confettiParticles.length; i++) {
+        const p = confettiParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.45; // Trọng lực rơi
+        p.rotation += p.vRot;
+        p.alpha -= 0.005;
+
+        confCtx.save();
+        confCtx.globalAlpha = Math.max(0, p.alpha);
+        confCtx.translate(p.x, p.y);
+        confCtx.rotate((p.rotation * Math.PI) / 180);
+        confCtx.fillStyle = p.color;
+        confCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+        confCtx.restore();
+      }
+
+      confettiParticles = confettiParticles.filter(p => p.alpha > 0 && p.y < confCanvas.height + 50);
+
+      if (confettiParticles.length > 0) {
+        confettiAnimId = requestAnimationFrame(renderConfetti);
+      } else {
+        confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+        confettiAnimId = null;
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       3. QUẢN LÝ DỮ LIỆU & LƯU TRỮ LOCALSTORAGE (OFFLINE-FIRST)
+       -------------------------------------------------------------------------- */
+    const STORAGE_KEY = 'VONG_XOAY_KY_DIEU_DATA';
+    
+    // Dữ liệu mẫu ban đầu nếu máy chưa có gì
+    const DEFAULT_DATA = {
+      selectedClass: "11B2",
+      scriptUrl: "",
+      classes: {
+        "11B2": [
+          { stt: 1, name: "Nguyễn Văn An" },
+          { stt: 2, name: "Trần Thị Bích" },
+          { stt: 3, name: "Lê Hoàng Nam" },
+          { stt: 4, name: "Phạm Minh Đức" },
+          { stt: 5, name: "Đặng Thuỳ Dương" },
+          { stt: 6, name: "Vũ Quốc Hưng" },
+          { stt: 7, name: "Ngô Mỹ Linh" },
+          { stt: 8, name: "Bùi Tuấn Kiệt" }
+        ]
+      }
+    };
+
+    let appData = {};
+
+    function loadAppData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          appData = JSON.parse(saved);
+        } else {
+          appData = DEFAULT_DATA;
+          saveAppData();
+        }
+      } catch (e) {
+        appData = DEFAULT_DATA;
+      }
+      populateClassSelect();
+    }
+
+    function saveAppData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    function populateClassSelect() {
+      const select = document.getElementById('classSelect');
+      select.innerHTML = '';
+      const classNames = Object.keys(appData.classes || {});
+
+      if (classNames.length === 0) {
+        select.innerHTML = '<option value="">(Chưa có lớp nào)</option>';
+        updateBadgeInfo();
+        drawWheel();
+        return;
+      }
+
+      classNames.sort().forEach(cName => {
+        const opt = document.createElement('option');
+        opt.value = cName;
+        opt.textContent = 'Lớp ' + cName;
+        if (cName === appData.selectedClass) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      if (!appData.selectedClass || !appData.classes[appData.selectedClass]) {
+        appData.selectedClass = classNames[0];
+        select.value = appData.selectedClass;
+        saveAppData();
+      }
+
+      updateBadgeInfo();
+      drawWheel();
+    }
+
+    function handleClassChange() {
+      appData.selectedClass = document.getElementById('classSelect').value;
+      saveAppData();
+      updateBadgeInfo();
+      drawWheel();
+    }
+
+    function updateBadgeInfo() {
+      const badge = document.getElementById('classInfoBadge');
+      const curClass = appData.selectedClass;
+      if (curClass && appData.classes[curClass]) {
+        const count = appData.classes[curClass].length;
+        badge.innerHTML = `<span><strong>Lớp: ${curClass}</strong> &nbsp;|&nbsp; Sĩ số: <strong>${count}</strong> học sinh</span>`;
+      } else {
+        badge.innerHTML = `<span>Chưa có dữ liệu lớp học</span>`;
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       4. ĐỘNG CƠ VÒNG XOAY (CANVAS 2D & GIẢI THUẬT QUÁN TÍNH CHẬM DẦN)
+       -------------------------------------------------------------------------- */
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const center = canvas.width / 2;
+    const radius = center - 12;
+
+    let currentAngle = 0;       // Góc quay hiện tại (radian)
+    let spinState = 'IDLE';     // 'IDLE', 'FAST_SPIN', 'PAUSED', 'DECELERATING'
+    let lastTickSegment = -1;
+    let selectedStudent = null;
+
+    // Các tham số giảm tốc mượt mà qua Easing (4.5 giây)
+    let decelStartTime = 0;
+    const DECEL_DURATION = 4600; // 4.6 giây
+    let decelStartAngle = 0;
+    let decelTargetAngle = 0;
+
+    const sectorColors = [
+      '#ef4444', '#f97316', '#f59e0b', '#10b981',
+      '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899'
+    ];
+
+    function getCurrentStudentList() {
+      if (!appData.selectedClass || !appData.classes[appData.selectedClass]) return [];
+      return appData.classes[appData.selectedClass];
+    }
+
+    function drawWheel() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const students = getCurrentStudentList();
+      const total = students.length;
+
+      if (total === 0) {
+        // Vòng xoay rỗng
+        ctx.beginPath();
+        ctx.arc(center, center, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#f59e0b';
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 16px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Chưa có danh sách học sinh', center, center);
+        return;
+      }
+
+      const arc = (2 * Math.PI) / total;
+
+      for (let i = 0; i < total; i++) {
+        const startA = currentAngle + i * arc;
+        const endA = startA + arc;
+
+        // Vẽ từng nan quạt
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, startA, endA);
+        ctx.fillStyle = sectorColors[i % sectorColors.length];
+        ctx.fill();
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        // Vẽ Số Thứ Tự (STT) của học sinh
+        ctx.save();
+        ctx.translate(center, center);
+        ctx.rotate(startA + arc / 2);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = total > 35 ? 'bold 14px system-ui' : 'bold 18px system-ui';
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(students[i].stt, radius - 24, 0);
+        ctx.restore();
+      }
+
+      checkAudioTick(total, arc);
+    }
+
+    // Phát tiếng tíc-tắc khi kim ở vị trí 12h chạm vào ranh giới nan quạt
+    function checkAudioTick(total, arc) {
+      if (spinState !== 'FAST_SPIN' && spinState !== 'DECELERATING') return;
+      // Kim ở vị trí 12h tương ứng góc -PI/2
+      let normAngle = ((-Math.PI / 2 - currentAngle) % (2 * Math.PI));
+      if (normAngle < 0) normAngle += (2 * Math.PI);
+      const segIndex = Math.floor(normAngle / arc);
+
+      if (segIndex !== lastTickSegment) {
+        lastTickSegment = segIndex;
+        playTickSound();
+      }
+    }
+
+    // Hàm Easing mượt mà: Cubic Ease-Out
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    // Vòng lặp chuyển động chuẩn 60FPS
+    function animationLoop(timestamp) {
+      if (spinState === 'FAST_SPIN') {
+        currentAngle += 0.38; // Tốc độ quay nhanh đều
+        drawWheel();
+        requestAnimationFrame(animationLoop);
+      } else if (spinState === 'DECELERATING') {
+        const elapsed = timestamp - decelStartTime;
+        const progress = Math.min(1, elapsed / DECEL_DURATION);
+        const ease = easeOutCubic(progress);
+
+        currentAngle = decelStartAngle + (decelTargetAngle - decelStartAngle) * ease;
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animationLoop);
+        } else {
+          // DỪNG HOÀN TOÀN CHÍNH XÁC VÀO Ô ĐÃ CHỌN
+          currentAngle = decelTargetAngle;
+          spinState = 'IDLE';
+          drawWheel();
+          updateButtonsUI();
+          onSpinSuccess();
+        }
+      } else {
+        drawWheel();
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       5. BỘ ĐIỀU KHIỂN CÁC NÚT (START, PAUSE, STOP)
+       -------------------------------------------------------------------------- */
+    function startSpin() {
+      const students = getCurrentStudentList();
+      if (students.length === 0) {
+        alert("Vui lòng chọn hoặc nạp danh sách học sinh trước khi quay!");
+        return;
+      }
+      initAudio();
+      spinState = 'FAST_SPIN';
+      updateButtonsUI();
+      requestAnimationFrame(animationLoop);
+    }
+
+    function togglePauseSpin() {
+      if (spinState === 'FAST_SPIN') {
+        spinState = 'PAUSED';
+      } else if (spinState === 'PAUSED') {
+        spinState = 'FAST_SPIN';
+        requestAnimationFrame(animationLoop);
+      }
+      updateButtonsUI();
+    }
+
+    function stopSpin() {
+      if (spinState !== 'FAST_SPIN' && spinState !== 'PAUSED') return;
+
+      const students = getCurrentStudentList();
+      const total = students.length;
+      const arc = (2 * Math.PI) / total;
+
+      // 1. Chọn ngẫu nhiên 1 học sinh may mắn
+      const luckyIndex = Math.floor(Math.random() * total);
+      selectedStudent = students[luckyIndex];
+
+      // 2. Tính toán góc đích sao cho ô luckyIndex nằm ngay tại vị trí kim 12h (-PI/2)
+      // Tâm của ô luckyIndex là: angle + (luckyIndex + 0.5) * arc = -PI/2
+      const targetBaseAngle = -Math.PI / 2 - (luckyIndex + 0.5) * arc;
+
+      // 3. Cho quay thêm từ 5 đến 7 vòng tròn lớn trước khi dừng hẳn
+      const extraRotations = 6 * (2 * Math.PI);
+      let target = currentAngle + extraRotations;
+      let diff = (targetBaseAngle - target) % (2 * Math.PI);
+      if (diff < 0) diff += 2 * Math.PI;
+
+      decelStartAngle = currentAngle;
+      decelTargetAngle = target + diff;
+      decelStartTime = performance.now();
+      spinState = 'DECELERATING';
+
+      updateButtonsUI();
+      requestAnimationFrame(animationLoop);
+    }
+
+    function updateButtonsUI() {
+      const btnStart = document.getElementById('btnStart');
+      const btnPause = document.getElementById('btnPause');
+      const btnStop = document.getElementById('btnStop');
+      const pauseText = document.getElementById('pauseBtnText');
+
+      if (spinState === 'FAST_SPIN') {
+        btnStart.disabled = true;
+        btnPause.disabled = false;
+        btnStop.disabled = false;
+        pauseText.textContent = 'TẠM DỪNG';
+      } else if (spinState === 'PAUSED') {
+        btnStart.disabled = true;
+        btnPause.disabled = false;
+        btnStop.disabled = false;
+        pauseText.textContent = 'TIẾP TỤC';
+      } else if (spinState === 'DECELERATING') {
+        btnStart.disabled = true;
+        btnPause.disabled = true;
+        btnStop.disabled = true;
+      } else { // IDLE
+        btnStart.disabled = false;
+        btnPause.disabled = true;
+        btnStop.disabled = true;
+        pauseText.textContent = 'TẠM DỪNG';
+      }
+    }
+
+    // Khi vòng xoay đã dừng hẳn vào học sinh trúng giải
+    function onSpinSuccess() {
+      playFanfareSound();
+      triggerConfetti();
+
+      document.getElementById('winnerSTT').textContent = 'SỐ THỨ TỰ: ' + selectedStudent.stt;
+      document.getElementById('winnerName').textContent = selectedStudent.name;
+      document.getElementById('resultModal').classList.add('active');
+    }
+
+    function closeResultModal() {
+      document.getElementById('resultModal').classList.remove('active');
+    }
+
+    /* --------------------------------------------------------------------------
+       6. QUẢN LÝ THÊM / SỬA / XÓA LỚP & SAO LƯU DỰ PHÒNG
+       -------------------------------------------------------------------------- */
+    function openClassManagerModal() {
+      const curClass = appData.selectedClass || '';
+      document.getElementById('inputClassName').value = curClass;
+      
+      const students = getCurrentStudentList();
+      if (students.length > 0) {
+        document.getElementById('inputRawStudents').value = students.map(s => `${s.stt}. ${s.name}`).join('\n');
+      } else {
+        document.getElementById('inputRawStudents').value = '';
+      }
+      document.getElementById('classManagerModal').classList.add('active');
+    }
+
+    function closeClassManagerModal() {
+      document.getElementById('classManagerModal').classList.remove('active');
+    }
+
+    function handleSaveClass() {
+      const className = document.getElementById('inputClassName').value.trim();
+      const rawText = document.getElementById('inputRawStudents').value.trim();
+
+      if (!className) {
+        alert("Vui lòng nhập tên lớp học!");
+        return;
+      }
+      if (!rawText) {
+        alert("Vui lòng dán danh sách học sinh!");
+        return;
+      }
+
+      const lines = rawText.split('\n');
+      const students = [];
+      let autoIndex = 1;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        
+        let stt = autoIndex;
+        let name = trimmed;
+
+        // Phân tách nếu có sẵn STT phía trước (ví dụ "1. Nguyễn Văn A" hoặc "1 \t Nguyễn Văn A")
+        const match = trimmed.match(/^(\d+)[\.\t\s\-\:]+(.*)$/);
+        if (match) {
+          stt = parseInt(match[1], 10);
+          name = match[2].trim();
+        } else {
+          autoIndex++;
+        }
+
+        if (name) students.push({ stt, name });
+      });
+
+      if (students.length === 0) {
+        alert("Không tìm thấy học sinh hợp lệ!");
+        return;
+      }
+
+      students.sort((a, b) => a.stt - b.stt);
+      if (!appData.classes) appData.classes = {};
+      appData.classes[className] = students;
+      appData.selectedClass = className;
+
+      saveAppData();
+      populateClassSelect();
+      closeClassManagerModal();
+      alert(`Đã lưu thành công lớp ${className} (${students.length} học sinh) vào bộ nhớ máy!`);
+    }
+
+    function handleDeleteCurrentClass() {
+      const className = document.getElementById('inputClassName').value.trim();
+      if (!className || !appData.classes[className]) {
+        alert("Lớp này chưa có trong danh sách!");
+        return;
+      }
+      if (confirm(`Thầy cô có chắc chắn muốn xóa lớp ${className} không?`)) {
+        delete appData.classes[className];
+        const remaining = Object.keys(appData.classes);
+        appData.selectedClass = remaining.length > 0 ? remaining[0] : '';
+        saveAppData();
+        populateClassSelect();
+        closeClassManagerModal();
+      }
+    }
+
+    // Xuất tệp JSON sao lưu
+    function exportBackupData() {
+      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `VongXoay_SaoLuu_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Nạp tệp JSON sao lưu từ máy khác
+    function importBackupData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.classes) {
+            appData = imported;
+            saveAppData();
+            populateClassSelect();
+            closeClassManagerModal();
+            alert("Nạp tệp sao lưu thành công!");
+          } else {
+            alert("Định dạng tệp sao lưu không đúng!");
+          }
+        } catch (err) {
+          alert("Lỗi khi đọc tệp: " + err);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* --------------------------------------------------------------------------
+       7. ĐỒNG BỘ HAI CHIỀU VỚI GOOGLE DRIVE (ONLINE INTEGRATION)
+       -------------------------------------------------------------------------- */
+    function openSyncModal() {
+      document.getElementById('inputScriptUrl').value = appData.scriptUrl || '';
+      document.getElementById('syncStatus').textContent = '';
+      document.getElementById('syncModal').classList.add('active');
+    }
+    function closeSyncModal() {
+      document.getElementById('syncModal').classList.remove('active');
+    }
+
+    // Đẩy dữ liệu từ máy lên Google Drive
+    async function syncPushToCloud() {
+      const scriptUrl = document.getElementById('inputScriptUrl').value.trim();
+      if (!scriptUrl) {
+        alert("Vui lòng dán link Web App Google Apps Script trước!");
+        return;
+      }
+      appData.scriptUrl = scriptUrl;
+      saveAppData();
+
+      const status = document.getElementById('syncStatus');
+      const btn = document.getElementById('btnPushCloud');
+      btn.disabled = true;
+      status.style.color = '#fbbf24';
+      status.textContent = 'Đang đồng bộ dữ liệu lên Google Drive...';
+
+      try {
+        const payload = JSON.stringify({
+          action: 'saveAll',
+          classes: appData.classes
+        });
+
+        // Gửi qua phương thức POST (text/plain để tránh preflight CORS redirect)
+        const response = await fetch(scriptUrl, {
+          method: 'POST',
+          body: payload,
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        });
+
+        const res = await response.json();
+        if (res.success) {
+          status.style.color = '#10b981';
+          status.textContent = 'Đồng bộ lên Google Drive thành công!';
+        } else {
+          throw new Error(res.message);
+        }
+      } catch (err) {
+        status.style.color = '#ef4444';
+        status.textContent = 'Lỗi đồng bộ: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Tải dữ liệu từ Google Drive về máy
+    async function syncPullFromCloud() {
+      const scriptUrl = document.getElementById('inputScriptUrl').value.trim();
+      if (!scriptUrl) {
+        alert("Vui lòng dán link Web App Google Apps Script trước!");
+        return;
+      }
+      appData.scriptUrl = scriptUrl;
+      saveAppData();
+
+      const status = document.getElementById('syncStatus');
+      const btn = document.getElementById('btnPullCloud');
+      btn.disabled = true;
+      status.style.color = '#fbbf24';
+      status.textContent = 'Đang tải dữ liệu từ Google Drive...';
+
+      try {
+        const response = await fetch(`${scriptUrl}?action=getAll`);
+        const res = await response.json();
+        if (res.success && res.classes) {
+          appData.classes = res.classes;
+          saveAppData();
+          populateClassSelect();
+          status.style.color = '#10b981';
+          status.textContent = `Đã tải về thành công ${Object.keys(res.classes).length} lớp!`;
+        } else {
+          throw new Error(res.message || 'Không có dữ liệu hợp lệ');
+        }
+      } catch (err) {
+        status.style.color = '#ef4444';
+        status.textContent = 'Lỗi tải về: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Khởi chạy khi load trang
+    window.onload = function() {
+      loadAppData();
+    };
+  </script>
+</body>
+</html>
